@@ -22,7 +22,7 @@ class HealthCollector
         $dbOk = $this->databaseOk($latency);
 
         return [
-            'app_name' => (string) (config('ai-brain-connector.app_name') ?: config('app.name', 'app')),
+            'app_name' => $this->appName(),
             'project' => config('ai-brain-connector.project') ?: null,
             'hostname' => gethostname() ?: null,
             'queue_oldest_pending_seconds' => $this->queueOldestPendingSeconds(),
@@ -34,6 +34,32 @@ class HealthCollector
             'app_version' => $this->appVersion(),
             'php_version' => PHP_VERSION,
         ];
+    }
+
+    /**
+     * App-Name für AI Brain. Zero-Config-Reihenfolge:
+     *   1. explizit gesetzt (AI_BRAIN_CONNECTOR_APP)
+     *   2. Produkt-Slug der Bridge-Anbindung (`ai-brain-bridge.source`) — eindeutig
+     *      und identisch mit dem Projekt-Slug in AI Brain
+     *   3. APP_NAME als letzter Fallback
+     *
+     * Punkt 2 ist wichtig: APP_NAME ist in vielen Apps noch der Default „Laravel",
+     * und der App-Slug ist in AI Brain global eindeutig — zwei „Laravel"-Apps
+     * würden sich sonst gegenseitig überschreiben.
+     */
+    protected function appName(): string
+    {
+        $configured = config('ai-brain-connector.app_name');
+        if (is_string($configured) && trim($configured) !== '') {
+            return trim($configured);
+        }
+
+        $source = config('ai-brain-bridge.source');
+        if (is_string($source) && trim($source) !== '') {
+            return trim($source);
+        }
+
+        return (string) config('app.name', 'app');
     }
 
     /**

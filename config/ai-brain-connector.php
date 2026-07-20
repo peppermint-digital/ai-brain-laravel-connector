@@ -7,8 +7,11 @@ return [
     // Client mehr als ein Projekt sieht und die App eindeutig zugeordnet werden muss.
     'project' => env('AI_BRAIN_CONNECTOR_PROJECT', ''),
 
-    // Anzeigename der App in AI Brain (eindeutig pro Projekt).
-    'app_name' => env('AI_BRAIN_CONNECTOR_APP', env('APP_NAME', 'app')),
+    // Anzeigename der App in AI Brain (global eindeutig). LEER LASSEN für
+    // Zero-Config: der Connector nimmt dann den Produkt-Slug der Bridge-Anbindung
+    // (`ai-brain-bridge.source`), erst danach APP_NAME. Nur setzen, wenn mehrere
+    // Apps/Worker-Hosts desselben Produkts getrennt auftauchen sollen.
+    'app_name' => env('AI_BRAIN_CONNECTOR_APP'),
 
     // Master-Schalter.
     'enabled' => (bool) env('AI_BRAIN_CONNECTOR_ENABLED', true),
