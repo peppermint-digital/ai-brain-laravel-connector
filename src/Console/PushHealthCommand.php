@@ -37,7 +37,9 @@ class PushHealthCommand extends Command
         }
 
         try {
-            AiBrain::call('report-app-health', $metrics);
+            // Tool-Namen in AI Brain tragen das `-tool`-Suffix (Str::kebab des
+            // Klassennamens inkl. „Tool") — analog report-codebase-audit-tool.
+            AiBrain::call('report-app-health-tool', $metrics);
             $this->info("ai-brain-connector: Health gepusht ({$metrics['app_name']}).");
 
             return self::SUCCESS;
