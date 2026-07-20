@@ -27,9 +27,20 @@ class ExceptionRecorder
     /** @var array<int, string> Log-Level, die als Fehler zählen. */
     protected const LEVELS = ['error', 'critical', 'alert', 'emergency'];
 
+    /**
+     * Rekursionsschutz: schlägt der Cache-Schreibvorgang fehl und wird das
+     * geloggt, feuert MessageLogged erneut — ohne Sperre endlos.
+     */
+    protected bool $recording = false;
+
     public function record(MessageLogged $event): void
     {
+        if ($this->recording) {
+            return;
+        }
+
         try {
+            $this->recording = true;
             if (! in_array($event->level, self::LEVELS, true)) {
                 return;
             }
@@ -42,6 +53,8 @@ class ExceptionRecorder
             $this->store($entry);
         } catch (Throwable) {
             // Monitoring darf die App nie stören.
+        } finally {
+            $this->recording = false;
         }
     }
 

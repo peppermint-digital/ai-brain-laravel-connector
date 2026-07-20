@@ -21,11 +21,28 @@ class SlowQueryRecorder
 {
     public const CACHE_KEY = 'ai_brain_connector:slow_queries';
 
+    /**
+     * Rekursionsschutz. Der Recorder schreibt seinen Befund in den Cache — beim
+     * `database`-Cache-Store ist DAS SELBST WIEDER EINE QUERY, die erneut
+     * QueryExecuted feuert. Ohne diese Sperre erzeugt eine einzige langsame
+     * Query eine Endlosrekursion bis zum Stack Overflow.
+     */
+    protected bool $recording = false;
+
     public function record(QueryExecuted $event): void
     {
+        if ($this->recording) {
+            return;
+        }
+
         try {
+            $this->recording = true;
             $thresholdMs = $this->thresholdMs();
             if ($event->time < $thresholdMs) {
+                return;
+            }
+
+            if ($this->isInfrastructureQuery($event->sql)) {
                 return;
             }
 
@@ -59,6 +76,8 @@ class SlowQueryRecorder
             Cache::put(self::CACHE_KEY, $items, now()->addHours(6));
         } catch (Throwable) {
             // Monitoring darf die App nie stören.
+        } finally {
+            $this->recording = false;
         }
     }
 
@@ -86,6 +105,29 @@ class SlowQueryRecorder
         } catch (Throwable) {
             return [];
         }
+    }
+
+    /**
+     * Queries der Laravel-Infrastruktur ausblenden: bei `database`-Cache,
+     * -Session oder -Queue erzeugt das Framework selbst dauernd Traffic auf
+     * diesen Tabellen. Die würden die Liste dominieren und echte Funde
+     * verdecken — und die Cache-Writes stammen zum Teil aus diesem Recorder.
+     */
+    protected function isInfrastructureQuery(string $sql): bool
+    {
+        $tables = array_filter([
+            config('cache.default') === 'database' ? (string) config('cache.stores.database.table', 'cache') : null,
+            config('session.driver') === 'database' ? (string) config('session.table', 'sessions') : null,
+            config('queue.default') === 'database' ? 'jobs' : null,
+        ]);
+
+        foreach ($tables as $table) {
+            if ($table !== '' && preg_match('/[`"\[\s]'.preg_quote($table, '/').'[`"\]\s]/i', $sql)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function thresholdMs(): int
