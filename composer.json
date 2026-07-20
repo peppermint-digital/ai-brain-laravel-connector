@@ -1,0 +1,27 @@
+{
+    "name": "ai-brain/laravel-connector",
+    "description": "Pusht Laravel-App-Health (Queue/DB/failed_jobs/Uptime) signiert an AI Brain zur Alarmierung.",
+    "type": "library",
+    "license": "proprietary",
+    "keywords": ["laravel", "ai-brain", "monitoring", "queue", "health"],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/http": "^11.0|^12.0|^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AiBrain\\Connector\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AiBrain\\Connector\\ConnectorServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
