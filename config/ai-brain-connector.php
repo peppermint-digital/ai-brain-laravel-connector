@@ -1,12 +1,6 @@
 <?php
 
 return [
-    // AI-Brain-Basis-URL, z.B. https://brain.proxy.peppermint-digital.com
-    'url' => env('AI_BRAIN_URL', ''),
-
-    // Geteiltes Event-HMAC-Secret (dasselbe wie AI Brains AI_BRAIN_EVENTS_SECRET).
-    'secret' => env('AI_BRAIN_EVENTS_SECRET', ''),
-
     // Projekt-Slug in AI Brain, dem diese App zugeordnet wird (Alert-Projekt).
     'project' => env('AI_BRAIN_CONNECTOR_PROJECT', ''),
 
@@ -19,7 +13,8 @@ return [
     // Scheduler-Frequenz (Methodenname auf dem Schedule-Event), z.B.
     // everyFiveMinutes, everyTenMinutes, everyFifteenMinutes.
     'schedule' => env('AI_BRAIN_CONNECTOR_SCHEDULE', 'everyFiveMinutes'),
-
-    // HTTP-Timeout des Pushs in Sekunden.
-    'timeout' => (int) env('AI_BRAIN_CONNECTOR_TIMEOUT', 5),
 ];
+
+// Transport (URL, OAuth-Token) kommt aus dem ai-brain-bridge-SDK — dieselbe
+// One-Click-Verbindung (`php artisan ai-brain:connect …`) wie bei den anderen
+// Produkten. Hier KEIN eigenes Secret / keine eigene URL.

@@ -1,6 +1,6 @@
 {
     "name": "ai-brain/laravel-connector",
-    "description": "Pusht Laravel-App-Health (Queue/DB/failed_jobs/Uptime) signiert an AI Brain zur Alarmierung.",
+    "description": "Pusht Laravel-App-Health (Queue/DB/failed_jobs/Uptime) über den AI-Brain-Bridge-MCP-Weg (OAuth) an AI Brain zur Alarmierung.",
     "type": "library",
     "license": "proprietary",
     "keywords": ["laravel", "ai-brain", "monitoring", "queue", "health"],
@@ -8,7 +8,7 @@
         "php": "^8.2",
         "illuminate/support": "^11.0|^12.0|^13.0",
         "illuminate/console": "^11.0|^12.0|^13.0",
-        "illuminate/http": "^11.0|^12.0|^13.0"
+        "peppermint/ai-brain-bridge": "dev-main"
     },
     "autoload": {
         "psr-4": {
@@ -22,6 +22,6 @@
             ]
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
