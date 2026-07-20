@@ -19,6 +19,21 @@ return [
     // Scheduler-Frequenz (Methodenname auf dem Schedule-Event), z.B.
     // everyFiveMinutes, everyTenMinutes, everyFifteenMinutes.
     'schedule' => env('AI_BRAIN_CONNECTOR_SCHEDULE', 'everyFiveMinutes'),
+
+    // Fehler-Erfassung: aggregiert geloggte Errors zwischen zwei Pushes
+    // (Klasse + Ort + Häufigkeit, KEINE Stacktraces, KEINE Payloads).
+    'exceptions' => [
+        'enabled' => (bool) env('AI_BRAIN_CONNECTOR_EXCEPTIONS', true),
+        'max_items' => (int) env('AI_BRAIN_CONNECTOR_EXCEPTIONS_MAX', 10),
+    ],
+
+    // Slow-Query-Erfassung: Queries oberhalb der Schwelle, aggregiert nach
+    // normalisiertem SQL. Bindings werden nie übertragen.
+    'slow_queries' => [
+        'enabled' => (bool) env('AI_BRAIN_CONNECTOR_SLOW_QUERIES', true),
+        'threshold_ms' => (int) env('AI_BRAIN_CONNECTOR_SLOW_QUERY_MS', 1000),
+        'max_items' => (int) env('AI_BRAIN_CONNECTOR_SLOW_QUERIES_MAX', 10),
+    ],
 ];
 
 // Transport (URL, OAuth-Token) kommt aus dem ai-brain-bridge-SDK — dieselbe

@@ -28,7 +28,7 @@ class PushHealthCommand extends Command
         }
 
         // Nur nicht-null-Werte senden (false/0 bleiben erhalten — z.B. db_ok=false).
-        $metrics = array_filter($collector->collect(), fn ($v) => $v !== null);
+        $metrics = array_filter($collector->collect(flush: ! $this->option('dry-run')), fn ($v) => $v !== null);
 
         if ($this->option('dry-run')) {
             $this->line((string) json_encode($metrics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));

@@ -3,7 +3,12 @@
 namespace AiBrain\Connector;
 
 use AiBrain\Connector\Console\PushHealthCommand;
+use AiBrain\Connector\Recorders\ExceptionRecorder;
+use AiBrain\Connector\Recorders\SlowQueryRecorder;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -20,6 +25,8 @@ class ConnectorServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->registerRecorders();
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/ai-brain-connector.php' => $this->app->configPath('ai-brain-connector.php'),
@@ -44,5 +51,33 @@ class ConnectorServiceProvider extends ServiceProvider
                 $event->everyFiveMinutes();
             }
         });
+    }
+
+    /**
+     * Fehler- und Slow-Query-Erfassung anhängen (beide einzeln abschaltbar).
+     * Als Singletons, damit Recorder und Collector dieselbe Instanz benutzen.
+     * Läuft bewusst auch in der Konsole — Queue-Worker sind der Ort, an dem die
+     * interessanten Fehler passieren.
+     */
+    protected function registerRecorders(): void
+    {
+        if (! config('ai-brain-connector.enabled')) {
+            return;
+        }
+
+        $this->app->singleton(ExceptionRecorder::class);
+        $this->app->singleton(SlowQueryRecorder::class);
+
+        if (config('ai-brain-connector.exceptions.enabled', true)) {
+            Event::listen(MessageLogged::class, function (MessageLogged $event): void {
+                $this->app->make(ExceptionRecorder::class)->record($event);
+            });
+        }
+
+        if (config('ai-brain-connector.slow_queries.enabled', true)) {
+            Event::listen(QueryExecuted::class, function (QueryExecuted $event): void {
+                $this->app->make(SlowQueryRecorder::class)->record($event);
+            });
+        }
     }
 }

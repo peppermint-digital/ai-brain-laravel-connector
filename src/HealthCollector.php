@@ -2,6 +2,8 @@
 
 namespace AiBrain\Connector;
 
+use AiBrain\Connector\Recorders\ExceptionRecorder;
+use AiBrain\Connector\Recorders\SlowQueryRecorder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -16,7 +18,7 @@ class HealthCollector
     /**
      * @return array<string, mixed>
      */
-    public function collect(): array
+    public function collect(bool $flush = true): array
     {
         $latency = null;
         $dbOk = $this->databaseOk($latency);
@@ -33,7 +35,45 @@ class HealthCollector
             'uptime_seconds' => $this->uptimeSeconds(),
             'app_version' => $this->appVersion(),
             'php_version' => PHP_VERSION,
-        ];
+        ] + $this->recorderMetrics($flush);
+    }
+
+    /**
+     * Fehler + langsame Queries als JSON-String (überlebt jede Transport-
+     * Serialisierung unverändert).
+     *
+     * Wichtig: Ist ein Recorder aktiv, wird auch bei LEEREM Fenster gesendet
+     * (`[]`). Sonst fehlte das Feld, der Server könnte „keine Fehler mehr" nicht
+     * von „meldet das Feature nicht" unterscheiden — und ein offener Alert würde
+     * sich nie wieder schließen.
+     *
+     * @return array<string, mixed>
+     */
+    protected function recorderMetrics(bool $flush): array
+    {
+        $out = [];
+
+        if (config('ai-brain-connector.exceptions.enabled', true)) {
+            $out['exceptions_json'] = $this->encodeList(app(ExceptionRecorder::class)->pull($flush));
+        }
+
+        if (config('ai-brain-connector.slow_queries.enabled', true)) {
+            $slow = app(SlowQueryRecorder::class);
+            $out['slow_queries_json'] = $this->encodeList($slow->pull($flush));
+            $out['slow_query_threshold_ms'] = $slow->thresholdMs();
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     */
+    protected function encodeList(array $items): string
+    {
+        $json = json_encode(array_values($items), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return is_string($json) ? $json : '[]';
     }
 
     /**
