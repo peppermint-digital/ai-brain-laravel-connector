@@ -1,7 +1,10 @@
 <?php
 
 return [
-    // Projekt-Slug in AI Brain, dem diese App zugeordnet wird (Alert-Projekt).
+    // Projekt-Slug in AI Brain (Alert-Projekt). LEER LASSEN für Zero-Config:
+    // AI Brain leitet das Projekt serverseitig aus der One-Click-Verbindung ab
+    // (der OAuth-Client ist auf genau ein Projekt gescopet). Nur setzen, wenn der
+    // Client mehr als ein Projekt sieht und die App eindeutig zugeordnet werden muss.
     'project' => env('AI_BRAIN_CONNECTOR_PROJECT', ''),
 
     // Anzeigename der App in AI Brain (eindeutig pro Projekt).

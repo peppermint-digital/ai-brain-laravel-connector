@@ -22,21 +22,28 @@ genügt:
 
 ```bash
 composer require ai-brain/laravel-connector
-php artisan vendor:publish --tag=ai-brain-connector-config   # optional
 ```
 
-`.env` der App (nur Zuordnung — Transport/Token kommen aus dem Bridge-SDK):
+**Das ist alles — kein ENV nötig (Zero-Config).** Der Connector
+
+- übernimmt als App-Namen automatisch `APP_NAME`,
+- lässt das Projekt leer → AI Brain ordnet die App serverseitig dem Projekt der
+  One-Click-Verbindung zu (der OAuth-Client ist auf genau ein Projekt gescopet),
+- **plant sich selbst** (alle 5 min, `withoutOverlapping`) — es genügt, dass der
+  App-Scheduler läuft (`schedule:run` per Cron, bei Forge Standard).
+
+### Optional überschreiben
+
+Nur falls nötig (mehrere Apps im selben Projekt unterscheiden, andere Frequenz):
 
 ```dotenv
-AI_BRAIN_CONNECTOR_PROJECT=<projekt-slug-in-ai-brain>   # z.B. schuelerferienpass-backend
-AI_BRAIN_CONNECTOR_APP="SFP Backend"                    # Anzeigename (eindeutig pro Projekt)
-# optional:
+AI_BRAIN_CONNECTOR_APP="SFP Backend"        # Anzeigename, Default: APP_NAME
+AI_BRAIN_CONNECTOR_PROJECT=<projekt-slug>   # nur nötig, wenn der OAuth-Client mehr als ein Projekt sieht
 AI_BRAIN_CONNECTOR_ENABLED=true
 AI_BRAIN_CONNECTOR_SCHEDULE=everyFiveMinutes
 ```
 
-Das Package **plant sich selbst** (alle 5 min, `withoutOverlapping`) — es genügt,
-dass der App-Scheduler läuft (`schedule:run` per Cron, bei Forge Standard).
+Config veröffentlichen (optional): `php artisan vendor:publish --tag=ai-brain-connector-config`.
 
 > Composer-Repos: Sowohl `peppermint/ai-brain-bridge` als auch dieses Package
 > liegen als VCS-/Git-Repositories vor — die `repositories`-Einträge dafür müssen
