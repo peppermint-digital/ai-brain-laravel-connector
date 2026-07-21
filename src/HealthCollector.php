@@ -102,9 +102,12 @@ class HealthCollector
         // Ein Produkt(-Slug) kann mehrere Deployments haben (staging/prod), evtl.
         // auf DEMSELBEN Host — Hostname unterscheidet sie dann nicht. Ohne Suffix
         // würden sie sich im global-eindeutigen app_healths.slug gegenseitig
-        // überschreiben. Nicht-Production-Umgebungen daher kennzeichnen.
+        // überschreiben. Nicht-Production-Umgebungen daher kennzeichnen — ABER
+        // nur, wenn der Name die Umgebung nicht ohnehin schon enthält (sonst
+        // entstünde „…-staging (staging)", wenn der Produkt-Slug bereits -staging
+        // trägt).
         $env = (string) app()->environment();
-        if ($env !== '' && $env !== 'production') {
+        if ($env !== '' && $env !== 'production' && ! str_contains(strtolower($base), strtolower($env))) {
             return $base.' ('.$env.')';
         }
 
