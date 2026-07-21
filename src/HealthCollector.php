@@ -91,15 +91,24 @@ class HealthCollector
     {
         $configured = config('ai-brain-connector.app_name');
         if (is_string($configured) && trim($configured) !== '') {
-            return trim($configured);
+            return trim($configured); // explizit gesetzt → verbatim, kein Suffix
         }
 
         $source = config('ai-brain-bridge.source');
-        if (is_string($source) && trim($source) !== '') {
-            return trim($source);
+        $base = is_string($source) && trim($source) !== ''
+            ? trim($source)
+            : (string) config('app.name', 'app');
+
+        // Ein Produkt(-Slug) kann mehrere Deployments haben (staging/prod), evtl.
+        // auf DEMSELBEN Host — Hostname unterscheidet sie dann nicht. Ohne Suffix
+        // würden sie sich im global-eindeutigen app_healths.slug gegenseitig
+        // überschreiben. Nicht-Production-Umgebungen daher kennzeichnen.
+        $env = (string) app()->environment();
+        if ($env !== '' && $env !== 'production') {
+            return $base.' ('.$env.')';
         }
 
-        return (string) config('app.name', 'app');
+        return $base;
     }
 
     /**
