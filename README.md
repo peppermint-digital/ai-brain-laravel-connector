@@ -14,6 +14,10 @@ Kein neuer Weg, kein geteiltes Secret in der App: der Connector ruft AI Brains
 `report-app-health`-Tool über dieselbe One-Click-Verbindung wie die anderen
 Produkte. Baut auf `peppermint/ai-brain-bridge`.
 
+Der Connector ist ein **reiner Service-Modus-Verbraucher** (userloser Push, kein
+Acting-User). Wie das im Gesamtbild funktioniert und wie man erweitert:
+📖 [`docs/how-it-works.md`](docs/how-it-works.md).
+
 ## Installation
 
 Voraussetzung: Die App hat die **AI-Brain-Bridge** eingebunden und ist per
