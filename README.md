@@ -1,5 +1,19 @@
 # ai-brain/laravel-connector
 
+> ## ⚠️ Dieses Paket ist abgelöst
+>
+> Sein Inhalt wohnt seit dem 09.09.2026 in `peppermint/ai-brain-bridge`
+> (AI Brain #5239). Ein Produkt soll ein Paket installieren und einen
+> Konfigurationsblock pflegen, nicht zwei mit derselben Gegenstelle.
+>
+> **Umstieg:** `composer remove ai-brain/laravel-connector` — mehr nicht. Die
+> ENV-Namen (`AI_BRAIN_CONNECTOR_*`) bleiben unverändert gültig, und solange
+> dieses Paket installiert ist, tritt die Bridge zurück, damit die Meldung
+> nicht doppelt läuft.
+>
+> Bis alle Produkte umgestiegen sind, bleibt dieses Paket funktionsfähig. Es
+> bekommt aber keine neuen Funktionen mehr.
+
 Pusht den Health-Snapshot einer Laravel-App (Queue / DB / failed_jobs / Uptime)
 an **AI Brain**, das schwellwertbasiert alarmiert (Task + Push):
 
